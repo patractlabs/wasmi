@@ -1,0 +1,6 @@
+(function() {var implementors = {};
+implementors["memory_units"] = [{"text":"impl PartialOrd&lt;Bytes&gt; for Bytes","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;Words&gt; for Words","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;Pages&gt; for Pages","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;Words&gt; for Words","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;Pages&gt; for Pages","synthetic":false,"types":[]}];
+implementors["num_bigint"] = [{"text":"impl PartialOrd&lt;Sign&gt; for Sign","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;BigInt&gt; for BigInt","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;BigUint&gt; for BigUint","synthetic":false,"types":[]}];
+implementors["num_rational"] = [{"text":"impl&lt;T:&nbsp;Clone + Integer&gt; PartialOrd&lt;Ratio&lt;T&gt;&gt; for Ratio&lt;T&gt;","synthetic":false,"types":[]}];
+implementors["wasmi"] = [{"text":"impl&lt;T:&nbsp;Into&lt;F32&gt; + Copy&gt; PartialOrd&lt;T&gt; for F32","synthetic":false,"types":[]},{"text":"impl&lt;T:&nbsp;Into&lt;F64&gt; + Copy&gt; PartialOrd&lt;T&gt; for F64","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

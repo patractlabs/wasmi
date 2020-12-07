@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["wasmi"] = [{"text":"impl Deref for FuncRef","synthetic":false,"types":[]},{"text":"impl Deref for GlobalRef","synthetic":false,"types":[]},{"text":"impl Deref for MemoryRef","synthetic":false,"types":[]},{"text":"impl Deref for ModuleRef","synthetic":false,"types":[]},{"text":"impl Deref for TableRef","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
