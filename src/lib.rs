@@ -151,7 +151,7 @@ impl Trap {
         &self.wasm_trace
     }
 
-    /// Returns wasm trace
+    /// Set wasm trace
     pub fn set_wasm_trace(mut self, trace: Vec<String>) -> Self {
         self.wasm_trace = trace;
         self
