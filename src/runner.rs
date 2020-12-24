@@ -224,7 +224,7 @@ impl Interpreter {
     }
 
     /// Get the stack functions
-    pub fn trace_stack(&self) -> Vec<Option<&String>> {
+    pub fn trace(&self) -> Vec<&(usize, String)> {
         self.call_stack.trace()
     }
 
@@ -1308,9 +1308,8 @@ impl FunctionContext {
         self.memory.as_ref()
     }
 
-    /// Get the function name
-    pub fn name(&self) -> Option<&String> {
-        self.function.name()
+    pub fn info(&self) -> Option<&(usize, String)> {
+        self.function.info()
     }
 }
 
@@ -1469,13 +1468,6 @@ struct CallStack {
 }
 
 impl CallStack {
-    /// Get the functions of current the stack
-    pub fn trace(&self) -> Vec<Option<&String>> {
-        self.buf.iter().map(|f| f.name()).collect::<Vec<_>>()
-    }
-}
-
-impl CallStack {
     fn push(&mut self, ctx: FunctionContext) {
         self.buf.push(ctx);
     }
@@ -1490,6 +1482,11 @@ impl CallStack {
 
     fn is_full(&self) -> bool {
         self.buf.len() + 1 >= self.limit
+    }
+
+    /// Get the functions of current the stack
+    pub fn trace(&self) -> Vec<&(usize, String)> {
+        self.buf.iter().filter_map(|f| f.info()).collect::<Vec<_>>()
     }
 }
 
