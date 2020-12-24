@@ -22,21 +22,19 @@ use parity_wasm::elements::Local;
 pub struct FuncRef {
     /// Function Instance
     instance: Rc<FuncInstance>,
-    /// Function name
-    name: Option<String>,
+    /// Function name and index for debug
+    info: Option<(usize, String)>,
 }
 
 impl FuncRef {
-    /// Return the name of function
-    pub fn name(&self) -> Option<&String> {
-        self.name.as_ref()
+    /// Get function info
+    pub fn info(&self) -> Option<&(usize, String)> {
+        self.info.as_ref()
     }
 
-    /// Mark the name of the function
-    pub fn set_name(mut self, name: Option<&String>) -> Self {
-        if let Some(name) = name {
-            self.name = Some(name.clone());
-        }
+    /// Set function info
+    pub fn set_info(mut self, index: usize, name: String) -> Self {
+        self.info = Some((index, name));
         self
     }
 }
@@ -107,8 +105,8 @@ impl FuncInstance {
             host_func_index,
         };
         FuncRef {
-            name: None,
             instance: Rc::new(FuncInstance(func)),
+            info: None,
         }
     }
 
@@ -139,8 +137,8 @@ impl FuncInstance {
             body: Rc::new(body),
         };
         FuncRef {
-            name: None,
             instance: Rc::new(FuncInstance(func)),
+            info: None,
         }
     }
 
@@ -172,14 +170,14 @@ impl FuncInstance {
                 let res = interpreter.start_execution(externals);
                 if res.is_err() {
                     let mut stack = interpreter
-                        .trace_stack()
+                        .trace()
                         .iter()
-                        .filter_map(|n| n.as_ref())
-                        .map(|n| rustc_demangle::demangle(n).to_string())
+                        .map(|n| format!("{:#}[{}]", rustc_demangle::demangle(&n.1), n.0))
                         .collect::<Vec<_>>();
                     stack.reverse();
 
                     // Embed this info into the trap
+                    println!("{:#?}", &stack);
                     res.map_err(|e| e.set_wasm_trace(stack))
                 } else {
                     res
