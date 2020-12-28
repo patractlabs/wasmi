@@ -177,7 +177,6 @@ impl FuncInstance {
                     stack.reverse();
 
                     // Embed this info into the trap
-                    println!("{:#?}", &stack);
                     res.map_err(|e| e.set_wasm_trace(stack))
                 } else {
                     res
