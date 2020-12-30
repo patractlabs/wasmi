@@ -148,6 +148,31 @@ impl Trap {
         }
     }
 
+    /// Embed a new context into wasm trace
+    pub fn wasm_trace_with(mut self, info: Option<&(usize, String)>) -> Trap {
+        if let Some(info) = info {
+            self.wasm_trace.push(format!(
+                "{:#}[{}]",
+                rustc_demangle::demangle(&info.1),
+                info.0
+            ));
+        }
+        self
+    }
+
+    /// Embed a new context into wasm trace
+    pub fn wasm_trace_with_kind(kind: TrapKind, info: Option<&(usize, String)>) -> Trap {
+        let mut trap: Self = kind.into();
+        if let Some(info) = info {
+            trap.wasm_trace.push(format!(
+                "{:#}[{}]",
+                rustc_demangle::demangle(&info.1),
+                info.0
+            ));
+        }
+        trap
+    }
+
     /// Returns wasm trace
     pub fn wasm_trace(&self) -> &Vec<String> {
         &self.wasm_trace
