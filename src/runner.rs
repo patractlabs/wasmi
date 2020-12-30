@@ -224,7 +224,7 @@ impl Interpreter {
     }
 
     /// Get the stack functions
-    pub fn trace(&self) -> Vec<&(usize, String)> {
+    pub fn trace(&self) -> Vec<Option<&(usize, String)>> {
         self.call_stack.trace()
     }
 
@@ -1495,8 +1495,8 @@ impl CallStack {
     }
 
     /// Get the functions of current the stack
-    pub fn trace(&self) -> Vec<&(usize, String)> {
-        self.buf.iter().filter_map(|f| f.info()).collect::<Vec<_>>()
+    pub fn trace(&self) -> Vec<Option<&(usize, String)>> {
+        self.buf.iter().map(|f| f.info()).collect::<Vec<_>>()
     }
 }
 
