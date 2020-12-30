@@ -172,7 +172,13 @@ impl FuncInstance {
                     let mut stack = interpreter
                         .trace()
                         .iter()
-                        .map(|n| format!("{:#}[{}]", rustc_demangle::demangle(&n.1), n.0))
+                        .map(|n| {
+                            if let Some(info) = n {
+                                format!("{:#}[{}]", rustc_demangle::demangle(&info.1), info.0)
+                            } else {
+                                "unknown".to_string()
+                            }
+                        })
                         .collect::<Vec<_>>();
 
                     // Append the panicing trap
