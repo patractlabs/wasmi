@@ -276,12 +276,14 @@ impl Interpreter {
 
             if !function_context.is_initialized() {
                 // Initialize stack frame for the function call.
-                function_context.initialize(&function_body.locals, &mut self.value_stack)?;
+                function_context
+                    .initialize(&function_body.locals, &mut self.value_stack)
+                    .map_err(|e| Trap::wasm_trace_with_kind(e, function_ref.clone().info()))?;
             }
 
             let function_return = self
                 .do_run_function(&mut function_context, &function_body.code)
-                .map_err(Trap::new)?;
+                .map_err(|e| Trap::wasm_trace_with_kind(e, function_ref.clone().info()))?;
 
             match function_return {
                 RunResult::Return => {
@@ -293,7 +295,10 @@ impl Interpreter {
                 }
                 RunResult::NestedCall(nested_func) => {
                     if self.call_stack.is_full() {
-                        return Err(TrapKind::StackOverflow.into());
+                        return Err(Trap::wasm_trace_with_kind(
+                            TrapKind::StackOverflow,
+                            function_ref.clone().info(),
+                        ));
                     }
 
                     match *nested_func.as_internal() {
@@ -316,7 +321,9 @@ impl Interpreter {
                                                 nested_func.signature().return_type(),
                                             );
                                         }
-                                        return Err(trap);
+                                        return Err(
+                                            trap.wasm_trace_with(function_ref.clone().info())
+                                        );
                                     }
                                 };
 
@@ -324,13 +331,16 @@ impl Interpreter {
                             let value_ty = return_val.as_ref().map(|val| val.value_type());
                             let expected_ty = nested_func.signature().return_type();
                             if value_ty != expected_ty {
-                                return Err(TrapKind::UnexpectedSignature.into());
+                                return Err(Trap::wasm_trace_with_kind(
+                                    TrapKind::StackOverflow,
+                                    function_ref.clone().info(),
+                                ));
                             }
 
                             if let Some(return_val) = return_val {
-                                self.value_stack
-                                    .push(return_val.into())
-                                    .map_err(Trap::new)?;
+                                self.value_stack.push(return_val.into()).map_err(|trap| {
+                                    Trap::wasm_trace_with_kind(trap, function_ref.clone().info())
+                                })?;
                             }
                         }
                     }
