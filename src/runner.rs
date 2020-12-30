@@ -320,9 +320,7 @@ impl Interpreter {
                                                 nested_func.signature().return_type(),
                                             );
                                         }
-                                        return Err(
-                                            trap.wasm_trace_with(function_ref.clone().info())
-                                        );
+                                        return Err(trap);
                                     }
                                 };
 
@@ -330,16 +328,11 @@ impl Interpreter {
                             let value_ty = return_val.as_ref().map(|val| val.value_type());
                             let expected_ty = nested_func.signature().return_type();
                             if value_ty != expected_ty {
-                                return Err(Trap::wasm_trace_with_kind(
-                                    TrapKind::StackOverflow,
-                                    function_ref.clone().info(),
-                                ));
+                                return Err(TrapKind::StackOverflow.into());
                             }
 
                             if let Some(return_val) = return_val {
-                                self.value_stack.push(return_val.into()).map_err(|trap| {
-                                    Trap::wasm_trace_with_kind(trap, function_ref.clone().info())
-                                })?;
+                                self.value_stack.push(return_val.into())?;
                             }
                         }
                     }

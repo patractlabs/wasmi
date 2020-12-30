@@ -176,7 +176,7 @@ impl FuncInstance {
                             if let Some(info) = n {
                                 format!("{:#}[{}]", rustc_demangle::demangle(&info.1), info.0)
                             } else {
-                                "unknown".to_string()
+                                "<unknown>".to_string()
                             }
                         })
                         .collect::<Vec<_>>();
