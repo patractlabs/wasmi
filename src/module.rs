@@ -310,6 +310,19 @@ impl ModuleInstance {
             &empty_index_map
         });
 
+        // Count Imports
+        let imports_count = if let Some(imports) = module.import_section() {
+            cfg_if::cfg_if! {
+                if #[cfg(not(feature = "substrate"))] {
+                    imports.entries().len()
+                } else {
+                    imports.entries().len().checked_sub(1).unwrap_or(0)
+                }
+            }
+        } else {
+            0
+        };
+
         let code = loaded_module.code();
         {
             let funcs = module
@@ -338,7 +351,7 @@ impl ModuleInstance {
                 let mut func_instance =
                     FuncInstance::alloc_internal(Rc::downgrade(&instance.0), signature, func_body);
                 if has_name_section {
-                    if let Some(name) = function_names.get(index as u32) {
+                    if let Some(name) = function_names.get((index + imports_count) as u32) {
                         func_instance = func_instance.set_info(index, name.to_string());
                     }
                 }
