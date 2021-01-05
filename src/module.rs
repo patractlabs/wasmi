@@ -341,6 +341,8 @@ impl ModuleInstance {
                 if has_name_section {
                     if let Some(name) = function_names.get((index + import_count) as u32) {
                         func_instance = func_instance.set_info(index, name.to_string());
+                    } else {
+                        func_instance = func_instance.set_info(index, "<unknown>".to_string());
                     }
                 }
                 instance.push_func(func_instance);
