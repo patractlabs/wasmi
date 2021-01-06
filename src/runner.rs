@@ -224,7 +224,7 @@ impl Interpreter {
     }
 
     /// Get the stack functions
-    pub fn trace(&self) -> Vec<&(usize, String)> {
+    pub fn trace(&self) -> Vec<Option<&(usize, String)>> {
         self.call_stack.trace()
     }
 
@@ -276,12 +276,14 @@ impl Interpreter {
 
             if !function_context.is_initialized() {
                 // Initialize stack frame for the function call.
-                function_context.initialize(&function_body.locals, &mut self.value_stack)?;
+                function_context
+                    .initialize(&function_body.locals, &mut self.value_stack)
+                    .map_err(|e| Trap::wasm_trace_with_kind(e, function_ref.clone().info()))?;
             }
 
             let function_return = self
                 .do_run_function(&mut function_context, &function_body.code)
-                .map_err(Trap::new)?;
+                .map_err(|e| Trap::wasm_trace_with_kind(e, function_ref.clone().info()))?;
 
             match function_return {
                 RunResult::Return => {
@@ -293,7 +295,10 @@ impl Interpreter {
                 }
                 RunResult::NestedCall(nested_func) => {
                     if self.call_stack.is_full() {
-                        return Err(TrapKind::StackOverflow.into());
+                        return Err(Trap::wasm_trace_with_kind(
+                            TrapKind::StackOverflow,
+                            function_ref.clone().info(),
+                        ));
                     }
 
                     match *nested_func.as_internal() {
@@ -328,9 +333,7 @@ impl Interpreter {
                             }
 
                             if let Some(return_val) = return_val {
-                                self.value_stack
-                                    .push(return_val.into())
-                                    .map_err(Trap::new)?;
+                                self.value_stack.push(return_val.into())?;
                             }
                         }
                     }
@@ -1485,8 +1488,8 @@ impl CallStack {
     }
 
     /// Get the functions of current the stack
-    pub fn trace(&self) -> Vec<&(usize, String)> {
-        self.buf.iter().filter_map(|f| f.info()).collect::<Vec<_>>()
+    pub fn trace(&self) -> Vec<Option<&(usize, String)>> {
+        self.buf.iter().map(|f| f.info()).collect::<Vec<_>>()
     }
 }
 

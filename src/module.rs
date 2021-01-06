@@ -18,7 +18,7 @@ use alloc::{
 use core::cell::{Ref, RefCell};
 use core::fmt;
 use parity_wasm::elements::{
-    External, IndexMap, InitExpr, Instruction, Internal, ResizableLimits, Type,
+    External, ImportCountType, IndexMap, InitExpr, Instruction, Internal, ResizableLimits, Type,
 };
 use validation::{DEFAULT_MEMORY_INDEX, DEFAULT_TABLE_INDEX};
 
@@ -310,6 +310,9 @@ impl ModuleInstance {
             &empty_index_map
         });
 
+        // Count Imported functions
+        let import_count = module.import_count(ImportCountType::Function);
+
         let code = loaded_module.code();
         {
             let funcs = module
@@ -338,8 +341,10 @@ impl ModuleInstance {
                 let mut func_instance =
                     FuncInstance::alloc_internal(Rc::downgrade(&instance.0), signature, func_body);
                 if has_name_section {
-                    if let Some(name) = function_names.get(index as u32) {
+                    if let Some(name) = function_names.get((index + import_count) as u32) {
                         func_instance = func_instance.set_info(index, name.to_string());
+                    } else {
+                        func_instance = func_instance.set_info(index, "<unknown>".to_string());
                     }
                 }
                 instance.push_func(func_instance);

@@ -168,17 +168,25 @@ impl FuncInstance {
             FuncInstanceInternal::Internal { .. } => {
                 let mut interpreter = Interpreter::new(func, args, None)?;
                 let res = interpreter.start_execution(externals);
-                if res.is_err() {
+                if let Err(trap) = res {
                     let mut stack = interpreter
                         .trace()
                         .iter()
-                        .map(|n| format!("{:#}[{}]", rustc_demangle::demangle(&n.1), n.0))
+                        .map(|n| {
+                            if let Some(info) = n {
+                                format!("{:#}[{}]", rustc_demangle::demangle(&info.1), info.0)
+                            } else {
+                                "<unknown>".to_string()
+                            }
+                        })
                         .collect::<Vec<_>>();
+
+                    // Append the panicing trap
+                    stack.append(&mut trap.wasm_trace().clone());
                     stack.reverse();
 
                     // Embed this info into the trap
-                    println!("{:#?}", &stack);
-                    res.map_err(|e| e.set_wasm_trace(stack))
+                    Err(trap.set_wasm_trace(stack))
                 } else {
                     res
                 }

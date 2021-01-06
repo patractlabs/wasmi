@@ -67,8 +67,7 @@ fn main() {
     }
 
     let module = load_from_file(&args[1]).try_parse_names();
-
-    let _ = ModuleInstance::new(
+    let res = ModuleInstance::new(
         &module,
         &ImportsBuilder::default()
             // Well known imports.
@@ -82,6 +81,11 @@ fn main() {
     .expect("Failed to instantiate module")
     .run_start(&mut NopExternals)
     .expect("Failed to run start function in module")
-    .invoke_export("_start", &[], &mut NopExternals)
-    .unwrap();
+    .invoke_export("_start", &[], &mut NopExternals);
+
+    // Prints anyway
+    match res {
+        Err(Error::Trap(err)) => println!("{:#?}", err),
+        r => println!("{:#?}", r),
+    }
 }
