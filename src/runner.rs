@@ -329,7 +329,7 @@ impl Interpreter {
                             let value_ty = return_val.as_ref().map(|val| val.value_type());
                             let expected_ty = nested_func.signature().return_type();
                             if value_ty != expected_ty {
-                                return Err(TrapKind::StackOverflow.into());
+                                return Err(TrapKind::UnexpectedSignature.into());
                             }
 
                             if let Some(return_val) = return_val {
